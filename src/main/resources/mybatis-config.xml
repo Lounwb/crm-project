@@ -8,6 +8,7 @@
     <properties resource="jdbc.properties"/>
     <typeAliases>
         <package name="com.lounwb.crm.settings.domain"/>
+        <package name="com.lounwb.crm.workbench.domain"/>
     </typeAliases>
     <environments default="development">
         <environment id="development">
@@ -23,6 +24,7 @@
 
     <mappers>
         <package name="com.lounwb.crm.settings.dao"/>
+        <package name="com.lounwb.crm.workbench.dao"/>
     </mappers>
 
 </configuration>

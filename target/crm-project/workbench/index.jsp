@@ -23,7 +23,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 		
 		//第一个菜单项的文字变成白色
 		$(".liClass:first > a").css("color" , "white");
-		
+
 		//给所有的菜单项注册鼠标单击事件
 		$(".liClass").click(function(){
 			//移除所有菜单项的激活状态

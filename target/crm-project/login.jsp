@@ -12,6 +12,9 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 <script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
 	<script>
 		$(function () {
+			if(window.top != window){
+				window.top.location = window.location
+			}
 			//页面加载完毕后，自动聚焦用户名文本块
 			$("#loginAct").focus()
 			//为登录按钮绑定事件，执行登陆操作

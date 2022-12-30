@@ -4,7 +4,12 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import java.io.IOException;
 
-@WebFilter("/settings/user/login.do")
+/**
+ * 解决乱码过滤器
+ * @author Lounwb
+ * @version 1.0
+ */
+@WebFilter("*.do")
 public class EncodingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse rep, FilterChain chain) throws IOException, ServletException {
