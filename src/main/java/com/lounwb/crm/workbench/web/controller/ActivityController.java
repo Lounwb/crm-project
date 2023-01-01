@@ -4,6 +4,7 @@ import com.lounwb.crm.settings.domain.User;
 import com.lounwb.crm.settings.service.UserService;
 import com.lounwb.crm.settings.service.impl.UserServiceImpl;
 import com.lounwb.crm.utils.*;
+import com.lounwb.crm.vo.PaginationVO;
 import com.lounwb.crm.workbench.domain.Activity;
 import com.lounwb.crm.workbench.service.ActivityService;
 import com.lounwb.crm.workbench.service.impl.ActivityServiceImpl;
@@ -24,7 +25,10 @@ import java.util.Map;
  * @version 1.0
  */
 
-@WebServlet({"/workbench/activity/getUserList.do","/workbench/activity/save.do","/workbench/activity/pageList.do"})
+@WebServlet({"/workbench/activity/getUserList.do",
+        "/workbench/activity/save.do",
+        "/workbench/activity/pageList.do",
+        "/workbench/activity/delete.do"})
 public class ActivityController extends HttpServlet {
 
 
@@ -38,7 +42,46 @@ public class ActivityController extends HttpServlet {
             getUserList(request, response);
         }else if("/workbench/activity/save.do".equals(path)){
             save(request, response);
+        }else if("/workbench/activity/pageList.do".equals(path)){
+            pageList(request, response);
+        }else if("/workbench/activity/delete.do".equals(path)){
+            delete(request, response);
         }
+    }
+
+    private void delete(HttpServletRequest request, HttpServletResponse response) {
+        String[] ids = request.getParameterValues("id");
+        ActivityService ac = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        boolean flag = ac.delete(ids);
+        PrintJson.printJsonFlag(response, flag);
+    }
+
+    private void pageList(HttpServletRequest request, HttpServletResponse response) {
+        String name = request.getParameter("name");
+        String owner = request.getParameter("owner");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+        String pageNoStr = request.getParameter("pageNo");
+        String pageSizeStr = request.getParameter("pageSize");
+        //页数
+        int pageNo = Integer.valueOf(pageNoStr);
+        //每页展示的记录数
+        int pageSize = Integer.valueOf(pageSizeStr);
+        //计算出略过的记录数
+        int skipCount = (pageNo - 1) * pageSize;
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("owner", owner);
+        map.put("startDate", startDate);
+        map.put("endDate", endDate);
+        map.put("skipCount", skipCount);
+        map.put("pageSize", pageSize);
+
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        PaginationVO<Activity> vo = as.pageList(map);
+        PrintJson.printJsonObj(response, vo);
     }
 
     private void save(HttpServletRequest request, HttpServletResponse response) {

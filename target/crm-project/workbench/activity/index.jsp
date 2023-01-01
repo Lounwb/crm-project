@@ -99,7 +99,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					if(data.success){
 						//添加成功后
 						//刷新市场活动信息列表（局部刷新）
-						//pageList(1,2);
+						pageList(1,2);
 
 						/*
 						*
@@ -144,7 +144,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 
 
 						 */
-						//$("#activityAddForm")[0].reset();
+						$("#activityAddForm")[0].reset();
 
 						//关闭添加操作的模态窗口
 						$("#createActivityModal").modal("hide");
@@ -154,7 +154,144 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				}
 			})
 		})
+		//页面加载完毕后触发一个方法
+		//默认展开列表的第一页，每页展现两条记录
+		pageList(1, 2)
+
+		//为查询按钮绑定事件，触发pageList方法
+		$("#searchBtn").click(function () {
+
+			$("#hidden-name").val($("#search-name").val())
+			$("#hidden-owner").val($("#search-owner").val())
+			$("#hidden-startDate").val($("#search-startDate").val())
+			$("#hidden-endDate").val($("#search-endDate").val())
+
+			pageList(1, 2)
+		})
+		//为全选的复选框绑定事件，触发全选操作
+		$("#qx").click(function () {
+			$("input[name=xz]").prop("checked", this.checked)
+		})
+		//以下这种做法是不行的
+		/*$("input[name=xz]").click(function () {
+
+			alert(123);
+
+		})*/
+		//因为动态生成的元素，是不能够以普通绑定事件的形式来进行操作的
+		/*
+			动态生成的元素，我们要以on方法的形式来触发事件
+			语法：
+				$(需要绑定元素的有效的外层元素).on(绑定事件的方式,需要绑定的元素的jquery对象,回调函数)
+		 */
+		$("#activityBody").on("click",$("input[name=xz]"),function () {
+
+			$("#qx").prop("checked",$("input[name=xz]").length==$("input[name=xz]:checked").length)
+
+		})
+		//为删除按钮绑定事件，执行市场活动删除操作
+		$("#deleteBtn").click(function () {
+
+			var $xz = $("input[name=xz]:checked")
+			if($xz.length == 0){
+				alert("请选择需要删除的记录")
+			}else {
+				if(confirm("确定删除所选中的记录吗？")){
+					//url:workbench/activity/delete.do
+					var param = ""
+					for (let i = 0; i < $xz.length; i++) {
+						param += "id=" + $xz[i].value
+						if(i < $xz.length-1){
+							param += "&"
+						}
+					}
+					$.ajax({
+						type : "POST",
+						url : "workbench/activity/delete.do",
+						dataType : "json",
+						data : param,
+						success : function (data) {
+							if(data.success){
+								pageList(1, 2)
+							}else {
+								alert("删除市场活动失败")
+							}
+						}
+					})
+				}
+			}
+		})
 	})
+	function pageList(pageNo, pageSize) {
+		//将全选的复选框的√干掉
+		$("#qx").prop("checked",false);
+
+		//查询前，将隐藏域中保存的信息取出来，重新赋予到搜索框中
+		$("#search-name").val($.trim($("#hidden-name").val()))
+		$("#search-owner").val($.trim($("#hidden-owner").val()))
+		$("#search-startDate").val($.trim($("#hidden-startDate").val()))
+		$("#search-endDate").val($.trim($("#hidden-endDate").val()))
+
+		$.ajax({
+			type : "GET",
+			url : "workbench/activity/pageList.do",
+			dataType : "json",
+			data : {
+				"pageNo" : pageNo,
+				"pageSize" : pageSize,
+				"name" : $.trim($("#search-name").val()),
+				"owner" : $.trim($("#search-owner").val()),
+				"startDate" : $.trim($("#search-startDate").val()),
+				"endDate" : $.trim($("#search-endDate").val())
+			},
+			success : function (data) {
+				/*
+					data
+						我们需要的：市场活动信息列表
+						[{市场活动1},{2},{3}] List<Activity> aList
+						一会分页插件需要的：查询出来的总记录数
+						{"total":100} int total
+						{"total":100,"dataList":[{市场活动1},{2},{3}]}
+				 */
+
+				var html = ""
+				$.each(data.dataList, function (i, n) {
+					html += '<tr class="active">'
+					html += '<td><input type="checkbox" name="xz" value="'+n.id+'"/></td>'
+					html += '<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'workbench/activity/detail.jsp\'">'+n.name+'</a></td>'
+					html += '<td>'+n.owner+'</td>'
+					html += '<td>'+n.startDate+'</td>'
+					html += '<td>'+n.endDate+'</td>'
+					html += '</tr>'
+				})
+				$("#activityBody").html(html)
+
+				//计算总页数
+				var totalPages = data.total%pageSize==0?data.total/pageSize:parseInt(data.total/pageSize)+1;
+
+				//数据处理完毕后，结合分页查询，对前端展现分页信息
+				$("#activityPage").bs_pagination({
+					currentPage: pageNo, // 页码
+					rowsPerPage: pageSize, // 每页显示的记录条数
+					maxRowsPerPage: 20, // 每页最多显示的记录条数
+					totalPages: totalPages, // 总页数
+					totalRows: data.total, // 总记录条数
+
+					visiblePageLinks: 3, // 显示几个卡片
+
+					showGoToPage: true,
+					showRowsPerPage: true,
+					showRowsInfo: true,
+					showRowsDefaultInfo: true,
+
+					//该回调函数时在，点击分页组件的时候触发的
+					onChangePage : function(event, data){
+						pageList(data.currentPage , data.rowsPerPage);
+					}
+				});
+			}
+		})
+	}
 </script>
 </head>
 <body>
@@ -385,7 +522,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						</tr>
 					</thead>
 					<tbody id="activityBody">
-						<tr class="active">
+						<%--<tr class="active">
 							<td><input type="checkbox" /></td>
 							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/activity/detail.jsp';">发传单</a></td>
                             <td>zhangsan</td>
@@ -398,7 +535,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
                             <td>zhangsan</td>
                             <td>2020-10-10</td>
                             <td>2020-10-20</td>
-                        </tr>
+                        </tr>--%>
 					</tbody>
 				</table>
 			</div>

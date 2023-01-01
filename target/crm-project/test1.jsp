@@ -10,19 +10,15 @@
 <body>
 
         $.ajax({
-
+            type : "",
             url : "",
+            dataType : "json",
             data : {
 
             },
-            type : "",
-            dataType : "json",
             success : function (data) {
 
-
-
             }
-
         })
 
         String createTime = DateTimeUtil.getSysTime();

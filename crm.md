@@ -97,7 +97,99 @@
    $("#activityAddForm")[0].reset();
    
    //关闭添加操作的模态窗口
-   $("#createActivityModal").modal("hide");
+   $("#createActivityModal").modal("hide");4.
+   ```
+
+
+4. [未解决]根据信息条件查询市场活动时出现一条记录也没有的问题
+
+   复制老师的源代码后bug没了，不同点在于老师的startDate和endDate没有模糊查询（确实不能用模糊查询）但是把老师的代码加上模糊查询后依旧正常能用，但是对比自己和老师的代码后除了这点其余没有任何区别。
+
+   ![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202212311825211.png)
+
+   ```xml
+   <select id="getTotalByCondition" resultType="int">
+           select
+               count(*)
+           from
+               tbl_activity a
+           join
+               tbl_user u
+           on
+               a.owner = u.id
+           <where>
+               <if test="name != null and name != ''">
+                   a.name like '%' #{name} '%'
+               </if>
+               <if test="owner != null and owner != ''">
+                   and u.name like '%' #{owner} '%'
+               </if>
+               <if test="startDate != null and startDate != ''">
+                   and a.startDate &gt; '%' #{startDate} '%'
+               </if>
+               <if test="endDate != null and endDate != ''">
+                   and a.endDate &lt; '%' #{endDate} '%'
+               </if>
+           </where>
+   </select>
+       <select id="getActivityListByCondition" resultType="Activity">
+           select
+               a.id,
+               a.name,
+               u.name as owner,
+               a.startDate,
+               a.endDate
+           from
+               tbl_activity a
+           join
+               tbl_user u
+           on
+               a.owner = u.id
+           <where>
+               <if test="name != null and name != ''">
+                   a.name like '%' #{name} '%'
+               </if> 
+               <if test="owner != null and owner != ''">
+                   and u.name like '%' #{owner} '%'
+               </if>
+               <if test="startDate != null and startDate != ''">
+                   and a.startDate &gt; '%'#{startDate} '%'
+               </if>
+               <if test="endDate != null and endDate != ''">
+                   and a.endDate &lt; '%' #{endDate} '%'
+               </if>
+           </where>
+           order by
+               a.createTime desc
+           limit
+               #{skipCount},#{pageSize}
+    <select>
+   ```
+
+5. 查询市场活动时，在查询栏中输入条件后，不执行查询而点击下一页会自动带入条件查询
+
+   ![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202212311944828.png)
+
+   ```html
+   <!-- 解决方法：使用隐藏域 -->
+   <input type="hidden" id="hidden-name"/>
+   <input type="hidden" id="hidden-owner"/>
+   <input type="hidden" id="hidden-startDate"/>
+   <input type="hidden" id="hidden-endDate"/>
+   ```
+
+   ```javascript
+   //存到隐藏域中
+   $("#hidden-name").val($("#search-name").val)
+   $("#hidden-owner").val($("#search-owner").val)
+   $("#hidden-startDate").val($("#search-startDate").val)
+   $("#hidden-endDate").val($("#search-endDate").val)
+   
+   //查询前，将隐藏域中保存的信息取出来，重新赋予到搜索框中
+   $("#search-name").val($.trim($("#hidden-name").val()))
+   $("#search-owner").val($.trim($("#hidden-owner").val()))
+   $("#search-startDate").val($.trim($("#hidden-startDate").val()))
+   $("#search-endDate").val($.trim($("#hidden-endDate").val()))
    ```
 
    
@@ -129,4 +221,63 @@
 
    pageSize:每页展示的记录数
 
-   ​		
+3. VO和Map的选择
+
+   当后端信息复用率高使用VO，新建一个VO类，复用率低使用Map
+
+ 4. 动态SQL，条件查询可能只是用一部分的条件，所以不能查询语句不能全部写上
+
+    ```xml
+    <select id="getActivityListByCondition" resultType="com.lounwb.crm.workbench.domain.Activity">
+            select
+                a.id,
+                a.name,
+                u.name as owner,
+                a.startDate,
+                a.endDate
+            from
+                tbl_activity a
+            join
+                tbl_user u
+            on
+                a.owner = u.id
+            <where>
+                <if test="name != null and name != ''">
+                    a.name like '%'#{name}'%'
+                </if>
+                <if test="owner != null and owner != ''">
+                    and u.name like '%'#{owner}'%'
+                </if>
+            </where>
+    </select>
+    ```
+
+
+5. 动态生成的元素，是不能够以普通绑定事件的形式来进行操作
+
+![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202212312004497.png)
+
+```javascript
+//以下这种做法是不行的
+		/*$("input[name=xz]").click(function () {
+
+			alert(123);
+
+		})*/
+
+		//因为动态生成的元素，是不能够以普通绑定事件的形式来进行操作的
+		/*
+
+			动态生成的元素，我们要以on方法的形式来触发事件
+
+			语法：
+				$(需要绑定元素的有效的外层元素).on(绑定事件的方式,需要绑定的元素的jquery对象,回调函数)
+
+		 */
+$("#activityBody").on("click",$("input[name=xz]"),function () {
+
+    		$("#qx").prop("checked",$("input[name=xz]").length==$("input[name=xz]:checked").length);
+
+})
+```
+
