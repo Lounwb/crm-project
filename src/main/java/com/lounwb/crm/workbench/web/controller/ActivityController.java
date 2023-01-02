@@ -28,7 +28,9 @@ import java.util.Map;
 @WebServlet({"/workbench/activity/getUserList.do",
         "/workbench/activity/save.do",
         "/workbench/activity/pageList.do",
-        "/workbench/activity/delete.do"})
+        "/workbench/activity/delete.do",
+        "/workbench/activity/getUserListAndActivity.do",
+        "/workbench/activity/update.do"})
 public class ActivityController extends HttpServlet {
 
 
@@ -46,13 +48,64 @@ public class ActivityController extends HttpServlet {
             pageList(request, response);
         }else if("/workbench/activity/delete.do".equals(path)){
             delete(request, response);
+        }else if("/workbench/activity/getUserListAndActivity.do".equals(path)){
+            getUserListAndActivity(request, response);
+        }else if("/workbench/activity/update.do".equals(path)){
+            update(request, response);
         }
+    }
+
+    private void update(HttpServletRequest request, HttpServletResponse response) {
+        /*
+            {
+                "id" : $.trim($("#edit-id").val()),
+                "owner" : $.trim($("#edit-owner").val()),
+                "name" : $.trim($("#edit-name").val()),
+                "startDate" : $.trim($("#edit-startDate").val()),
+                "endDate" : $.trim($("#edit-endDate").val()),
+                "cost" : $.trim($("#edit-cost").val()),
+                "description" : $.trim($("#edit-description").val())
+            }
+         */
+        String id = request.getParameter("id");
+        String owner = request.getParameter("owner");
+        String name = request.getParameter("name");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+        String cost = request.getParameter("cost");
+        String description = request.getParameter("description");
+        String editTime = DateTimeUtil.getSysTime();
+        String editBy = ((User)request.getSession().getAttribute("user")).getName();
+
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        Activity a = new Activity();
+        a.setId(id);
+        a.setOwner(owner);
+        a.setName(name);
+        a.setStartDate(startDate);
+        a.setEndDate(endDate);
+        a.setCost(cost);
+        a.setDescription(description);
+        a.setEditTime(editTime);
+        a.setEditBy(editBy);
+
+        boolean flag = as.update(a);
+
+        PrintJson.printJsonFlag(response, flag);
+    }
+
+    private void getUserListAndActivity(HttpServletRequest request, HttpServletResponse response) {
+        String id = request.getParameter("id");
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        Map<String, Object> map = as.getUserListAndActivity(id);
+        PrintJson.printJsonObj(response, map);
     }
 
     private void delete(HttpServletRequest request, HttpServletResponse response) {
         String[] ids = request.getParameterValues("id");
-        ActivityService ac = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
-        boolean flag = ac.delete(ids);
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        boolean flag = as.delete(ids);
         PrintJson.printJsonFlag(response, flag);
     }
 

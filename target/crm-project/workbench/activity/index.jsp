@@ -99,7 +99,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					if(data.success){
 						//添加成功后
 						//刷新市场活动信息列表（局部刷新）
-						pageList(1,2);
+						//pageList(1,2);
 
 						/*
 						*
@@ -118,7 +118,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 
 						//做完添加操作后，应该回到第一页，维持每页展现的记录数
 
-						//pageList(1,$("#activityPage").bs_pagination('getOption', 'rowsPerPage'));
+						pageList(1,$("#activityPage").bs_pagination('getOption', 'rowsPerPage'))
 
 
 
@@ -212,7 +212,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						data : param,
 						success : function (data) {
 							if(data.success){
-								pageList(1, 2)
+								pageList(1,$("#activityPage").bs_pagination('getOption', 'rowsPerPage'))
 							}else {
 								alert("删除市场活动失败")
 							}
@@ -220,6 +220,80 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					})
 				}
 			}
+		})
+
+		$("#editBtn").click(function () {
+			var $xz = $("input[name=xz]:checked")
+			if($xz.length == 0){
+				alert("请选择需要修改的记录")
+			}else if($xz.length > 1){
+				alert("只能选择一条记录进行修改")
+			}else {
+				var id = $xz.val()
+
+				$.ajax({
+					type : "GET",
+					url : "workbench/activity/getUserListAndActivity.do",
+					dataType : "json",
+					data : {
+						"id":id
+					},
+					success : function (data) {
+						//{"uList":[{用户1},{用户2}...],"a":{市场活动}}
+
+						var html = "<option></option>"
+						$.each(data.uList, function (i, n) {
+							html += "<option value='"+n.id+"'>"+n.name+"</option>"
+						})
+						$("#edit-owner").html(html)
+
+						$("#edit-id").val(data.a.id)
+						$("#edit-name").val(data.a.name)
+						$("#edit-owner").val(data.a.owner)
+						$("#edit-startDate").val(data.a.startDate)
+						$("#edit-endDate").val(data.a.endDate)
+						$("#edit-cost").val(data.a.cost)
+						$("#edit-description").val(data.a.description)
+
+						//所有的值都填写好之后，打开修改操作的模态窗口
+						$("#editActivityModal").modal("show");
+
+					}
+				})
+			}
+		})
+
+		$("#updateBtn").click(function () {
+			$.ajax({
+				type : "POST",
+				url : "workbench/activity/update.do",
+				dataType : "json",
+				data : {
+					"id" : $.trim($("#edit-id").val()),
+					"owner" : $.trim($("#edit-owner").val()),
+					"name" : $.trim($("#edit-name").val()),
+					"startDate" : $.trim($("#edit-startDate").val()),
+					"endDate" : $.trim($("#edit-endDate").val()),
+					"cost" : $.trim($("#edit-cost").val()),
+					"description" : $.trim($("#edit-description").val())
+				},
+				success : function (data) {
+					/*
+                        data
+                            {"success":true/false}
+                     */
+					if(data.success){
+						//修改成功后
+						//刷新市场活动信息列表（局部刷新）
+						pageList($("#activityPage").bs_pagination('getOption', 'currentPage'),
+								$("#activityPage").bs_pagination('getOption', 'rowsPerPage'))
+						//关闭修改操作的模态窗口
+						$("#editActivityModal").modal("hide");
+					}else {
+						alert("修改市场活动失败");
+					}
+				}
+			})
 		})
 	})
 	function pageList(pageNo, pageSize) {

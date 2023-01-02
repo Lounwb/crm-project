@@ -1,5 +1,7 @@
 package com.lounwb.crm.workbench.service.impl;
 
+import com.lounwb.crm.settings.dao.UserDao;
+import com.lounwb.crm.settings.domain.User;
 import com.lounwb.crm.utils.SqlSessionUtil;
 import com.lounwb.crm.vo.PaginationVO;
 import com.lounwb.crm.workbench.dao.ActivityDao;
@@ -7,12 +9,14 @@ import com.lounwb.crm.workbench.dao.ActivityRemarkDao;
 import com.lounwb.crm.workbench.domain.Activity;
 import com.lounwb.crm.workbench.service.ActivityService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ActivityServiceImpl implements ActivityService {
     private ActivityDao activityDao = SqlSessionUtil.getSqlSession().getMapper(ActivityDao.class);
     private ActivityRemarkDao activityRemarkDao = SqlSessionUtil.getSqlSession().getMapper(ActivityRemarkDao.class);
+    private UserDao userDao = SqlSessionUtil.getSqlSession().getMapper(UserDao.class);
 
 
     @Override
@@ -59,6 +63,33 @@ public class ActivityServiceImpl implements ActivityService {
         if(count3 != ids.length){
             return false;
         }
+        return flag;
+    }
+
+    @Override
+    public Map<String, Object> getUserListAndActivity(String id) {
+        //取uList
+        List<User> uList = userDao.getUserList();
+        //取a
+        Activity a = activityDao.getById(id);
+        //封装uList和a到Map
+        Map<String, Object> map = new HashMap<>();
+        map.put("uList", uList);
+        map.put("a", a);
+
+        return map;
+    }
+
+    @Override
+    public boolean update(Activity a) {
+        boolean flag = true;
+
+        int count = activityDao.update(a);
+
+        if(count != 1){
+            flag = false;
+        }
+
         return flag;
     }
 

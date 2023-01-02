@@ -19,6 +19,12 @@
 */
 ```
 
+3. 实际项目开发中添加和修改的顺序
+
+   在实际项目开发中，一定是按照先做添加，再做修改的这种顺序所以，为了节省开发时间，修改操作一般都是copy添加操作
+
+   
+
 ## 项目中出现的问题
 
 ### 登录验证模块
@@ -225,6 +231,8 @@
 
    当后端信息复用率高使用VO，新建一个VO类，复用率低使用Map
 
+   - 
+
  4. 动态SQL，条件查询可能只是用一部分的条件，所以不能查询语句不能全部写上
 
     ```xml
@@ -281,3 +289,33 @@ $("#activityBody").on("click",$("input[name=xz]"),function () {
 })
 ```
 
+6. 关于文本域textarea的使用
+
+```html
+<!--
+关于文本域textarea：
+（1）一定是要以标签对的形式来呈现,正常状态下标签对要紧紧的挨着
+（2）textarea虽然是以标签对的形式来呈现的，但是它也是属于表单元素范畴
+我们所有的对于textarea的取值和赋值操作，应该统一使用val()方法（而不是html()方法）
+-->
+<textarea class="form-control" rows="3" id="edit-description"></textarea>
+<!-- 对于(1)不能出现<textarea .... />的形式 -->
+<!-- 对于(1)不能出现<textarea>          </textarea>的形式 -->
+<!-- 对于(2)textarea没有value属性，但是文本域中的内容用.val（）方法来拿->
+```
+
+7. 执行增加删除修改后展示记录条数
+
+   ```javascript
+   /*
+   * $("#activityPage").bs_pagination('getOption', 'currentPage'):
+   *     操作后停留在当前页
+   *
+   * $("#activityPage").bs_pagination('getOption', 'rowsPerPage')
+   *     操作后维持已经设置好的每页展现的记录数
+   *
+   * 这两个参数不需要我们进行任何的修改操作
+   *  直接使用即可
+   *
+   * */
+   ```
