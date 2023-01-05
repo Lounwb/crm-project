@@ -6,6 +6,7 @@ import com.lounwb.crm.settings.service.impl.UserServiceImpl;
 import com.lounwb.crm.utils.*;
 import com.lounwb.crm.vo.PaginationVO;
 import com.lounwb.crm.workbench.domain.Activity;
+import com.lounwb.crm.workbench.domain.ActivityRemark;
 import com.lounwb.crm.workbench.service.ActivityService;
 import com.lounwb.crm.workbench.service.impl.ActivityServiceImpl;
 
@@ -30,7 +31,12 @@ import java.util.Map;
         "/workbench/activity/pageList.do",
         "/workbench/activity/delete.do",
         "/workbench/activity/getUserListAndActivity.do",
-        "/workbench/activity/update.do"})
+        "/workbench/activity/update.do",
+        "/workbench/activity/detail.do",
+        "/workbench/activity/getRemarkListByAid.do",
+        "/workbench/activity/deleteRemark.do",
+        "/workbench/activity/saveRemark.do",
+        "/workbench/activity/updateRemark.do"})
 public class ActivityController extends HttpServlet {
 
 
@@ -52,7 +58,96 @@ public class ActivityController extends HttpServlet {
             getUserListAndActivity(request, response);
         }else if("/workbench/activity/update.do".equals(path)){
             update(request, response);
+        }else if("/workbench/activity/detail.do".equals(path)){
+            detail(request, response);
+        }else if("/workbench/activity/getRemarkListByAid.do".equals(path)){
+            getRemarkListByAid(request, response);
+        }else if("/workbench/activity/deleteRemark.do".equals(path)){
+            deleteRemark(request, response);
+        }else if("/workbench/activity/saveRemark.do".equals(path)){
+            saveRemark(request, response);
+        }else if("/workbench/activity/updateRemark.do".equals(path)){
+            updateRemark(request, response);
         }
+    }
+
+    private void updateRemark(HttpServletRequest request, HttpServletResponse response) {
+        /*
+         "id" : id,
+        "noteContent" : $.trim($("#noteContent").val())
+        */
+        String id = request.getParameter("id");
+        String noteContent = request.getParameter("noteContent");
+        String editTime = DateTimeUtil.getSysTime();
+        String editBy = ((User) request.getSession().getAttribute("user")).getName();
+        String editFlag = "1";
+
+        ActivityRemark ar = new ActivityRemark();
+
+        ar.setId(id);
+        ar.setNoteContent(noteContent);
+        ar.setEditTime(editTime);
+        ar.setEditBy(editBy);
+        ar.setEditFlag(editFlag);
+
+        ActivityService ac = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        boolean flag = ac.updateRemark(ar);
+        //{"success":true,"ar":{备注}}
+        Map<String, Object> map = new HashMap<>();
+        map.put("success", flag);
+        map.put("ar", ar);
+        PrintJson.printJsonObj(response, map);
+    }
+
+    private void saveRemark(HttpServletRequest request, HttpServletResponse response) {
+        /*
+        "noteContent" : $.trim($("#remark").val()),
+					"activityId" : "${a.id}"
+         */
+        String noteContent = request.getParameter("noteContent");
+        String activityId = request.getParameter("activityId");
+        String id = UUIDUtil.getUUID();
+        String createTime = DateTimeUtil.getSysTime();
+        String createBy = ((User) request.getSession().getAttribute("user")).getName();
+        String editFlag = "0";
+
+        ActivityRemark ar = new ActivityRemark();
+        ar.setNoteContent(noteContent);
+        ar.setActivityId(activityId);
+        ar.setId(id);
+        ar.setCreateTime(createTime);
+        ar.setCreateBy(createBy);
+        ar.setEditFlag(editFlag);
+
+        ActivityService ac = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        boolean flag = ac.saveRemark(ar);
+        //{"success":true,"ar":{备注}}
+        Map<String, Object> map = new HashMap<>();
+        map.put("success",flag);
+        map.put("ar", ar);
+        PrintJson.printJsonObj(response, map);
+    }
+
+    private void deleteRemark(HttpServletRequest request, HttpServletResponse response) {
+        String id = request.getParameter("id");
+        ActivityService ac = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        boolean flag = ac.deleteRemark(id);
+        PrintJson.printJsonFlag(response, flag);
+    }
+
+    private void getRemarkListByAid(HttpServletRequest request, HttpServletResponse response) {
+        String activityId = request.getParameter("activityId");
+        ActivityService ac = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        List<ActivityRemark> arList = ac.getRemarkListByAid(activityId);
+        PrintJson.printJsonObj(response, arList);
+    }
+
+    private void detail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String id = request.getParameter("id");
+        ActivityService ac = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+        Activity a  = ac.detail(id);
+        request.setAttribute("a", a);
+        request.getRequestDispatcher("/workbench/activity/detail.jsp").forward(request, response);
     }
 
     private void update(HttpServletRequest request, HttpServletResponse response) {

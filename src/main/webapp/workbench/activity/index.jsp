@@ -166,7 +166,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			$("#hidden-startDate").val($("#search-startDate").val())
 			$("#hidden-endDate").val($("#search-endDate").val())
 
-			pageList(1, 2)
+			pageList(1,$("#activityPage").bs_pagination('getOption', 'rowsPerPage'))
 		})
 		//为全选的复选框绑定事件，触发全选操作
 		$("#qx").click(function () {
@@ -332,7 +332,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				$.each(data.dataList, function (i, n) {
 					html += '<tr class="active">'
 					html += '<td><input type="checkbox" name="xz" value="'+n.id+'"/></td>'
-					html += '<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'workbench/activity/detail.jsp\'">'+n.name+'</a></td>'
+					html += '<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'workbench/activity/detail.do?id='+n.id+'\'">'+n.name+'</a></td>'
 					html += '<td>'+n.owner+'</td>'
 					html += '<td>'+n.startDate+'</td>'
 					html += '<td>'+n.endDate+'</td>'

@@ -198,7 +198,27 @@
    $("#search-endDate").val($.trim($("#hidden-endDate").val()))
    ```
 
-   
+
+6. 市场活动备注动态生成的删除按钮单击后无反应
+
+![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301051603089.png)
+
+```javascript
+html += '<a onclick="deleteRemark('+n.id+')"></a>'
+
+//更正后
+onclick='<a onclick="deleteRemark(\''+n.id+'\')"></a>'
+//(\''+n.id+'\') \'转义跟外层'配对，不然套在""里面会被当成字符串
+//里面''是拼接字符串，是在""里面的字符串
+```
+
+**动态生成的元素所触发的方法，参数必须套用在字符串当中，即'onclick="deleteRemark(n.id)"'。**
+
+7. 市场活动备注删除后内容追加的问题
+
+​	![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301051622847.png)
+
+​	因为市场活动备注展现的时候使用的是before方法，所以删除后调用showRemarkList()后会在原来的备注后面追加新查询的备注。所以说需要查询前需要清空
 
 ## 项目开发中的设计方法
 
@@ -287,6 +307,7 @@ $("#activityBody").on("click",$("input[name=xz]"),function () {
     		$("#qx").prop("checked",$("input[name=xz]").length==$("input[name=xz]:checked").length);
 
 })
+//或者可以直接触发事件的方式 <button onclick="...."></button>
 ```
 
 6. 关于文本域textarea的使用
@@ -319,3 +340,12 @@ $("#activityBody").on("click",$("input[name=xz]"),function () {
    *
    * */
    ```
+
+8. 填充内容的多种使用方法
+
+![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301051152147.png)
+
+- 使用$("activityBody").html(html)
+  - 缺点：如果activityBody里面还有其他元素则无法使用
+- 获取前面的div，然后在其后面追加html，使用append
+- 获取后面的div，然后在其前面追加html，使用before：$("#remarkDiv").before(html)
