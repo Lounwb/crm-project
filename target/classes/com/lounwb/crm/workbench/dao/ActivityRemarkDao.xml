@@ -25,12 +25,12 @@
             activityId
         )
         values (
-            #{id#},
-            #{noteContent#},
-            #{createTime#},
-            #{createBy#},
-            #{editFlag#},
-            #{activityId#}
+            #{id},
+            #{noteContent},
+            #{createTime},
+            #{createBy},
+            #{editFlag},
+            #{activityId}
         )
     </insert>
     <delete id="deleteById">

@@ -220,9 +220,21 @@ onclick='<a onclick="deleteRemark(\''+n.id+'\')"></a>'
 
 ​	因为市场活动备注展现的时候使用的是before方法，所以删除后调用showRemarkList()后会在原来的备注后面追加新查询的备注。所以说需要查询前需要清空
 
+### 线索（潜在客户）模块
+
 ## 项目开发中的设计方法
 
 ### 登录验证模块
+
+1. 数据库表设计的时候不使用主键自增
+
+   原因：使用主键自增会降低速度，因为主键使用auto_increment，插入新字段的时候需要查询数据库表中最大的id，然后id+1最为新记录的id，所以涉及到查询会降低速度。
+
+2. 数据库表设计的时候不使用外键而是约定外键
+
+   如果使用假设B表的activity_id是外键关联A表的Id字段，如果b插入数据需要查询A表中是否有该id。由于涉及到查询，所以会降低速度。
+
+   我们采用约定好外键的方式，就是说在B表中仍然有Activity_id字段，A表中有id字段，我们默认activity_id关联id，使用的时候只需要Join表即可
 
 ### 市场活动模块
 
@@ -349,3 +361,6 @@ $("#activityBody").on("click",$("input[name=xz]"),function () {
   - 缺点：如果activityBody里面还有其他元素则无法使用
 - 获取前面的div，然后在其后面追加html，使用append
 - 获取后面的div，然后在其前面追加html，使用before：$("#remarkDiv").before(html)
+
+### 线索（潜在客户）模块
+
