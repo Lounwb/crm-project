@@ -52,224 +52,36 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			$(this).children("span").css("color","#E6E6E6");
 		});
 
-		//页面加载完毕后，取出关联的市场活动信息列表
-		showActivityList();
-
-		//为关联市场活动模态窗口中的 搜索框 绑定事件，通过触发回车键，查询并展现所需市场活动列表
-		$("#aname").keydown(function (event) {
-
-			//如果是回车键
-			if(event.keyCode==13){
-
-				//alert("查询并展现市场活动列表");
-
-				$.ajax({
-
-					url : "workbench/clue/getActivityListByNameAndNotByClueId.do",
-					data : {
-
-						"aname" : $.trim($("#aname").val()),
-						"clueId" : "${c.id}"
-
-					},
-					type : "get",
-					dataType : "json",
-					success : function (data) {
-
-						/*
-
-							data
-								[{市场活动1},{2},{3}]
-
-						 */
-						var html = "";
-
-						$.each(data,function (i,n) {
-
-							html += '<tr>';
-							html += '<td><input type="checkbox" name="xz" value="'+n.id+'"/></td>';
-							html += '<td>'+n.name+'</td>';
-							html += '<td>'+n.startDate+'</td>';
-							html += '<td>'+n.endDate+'</td>';
-							html += '<td>'+n.owner+'</td>';
-							html += '</tr>';
-
-						})
-
-						$("#activitySearchBody").html(html);
-
-
-
-
-					}
-
-				})
-
-
-				//展现完列表后，记得将模态窗口默认的回车行为禁用掉
-				return false;
-
-			}
-
-		})
-
-		//为关联按钮绑定事件，执行关联表的添加操作
-		$("#bundBtn").click(function () {
-
-			var $xz = $("input[name=xz]:checked");
-
-			if($xz.length==0){
-
-				alert("请选择需要关联的市场活动");
-
-			//1条或者多条
-			}else{
-
-				//workbench/clue/bund.do?cid=xxx&aid=xxx&aid=xxx&aid=xxx
-
-				var param = "cid=${c.id}&";
-
-				for(var i=0;i<$xz.length;i++){
-
-					param += "aid="+$($xz[i]).val();
-
-					if(i<$xz.length-1){
-
-						param += "&";
-
-					}
-
-				}
-
-				//alert(param);
-
-				$.ajax({
-
-					url : "workbench/clue/bund.do",
-					data : param,
-					type : "post",
-					dataType : "json",
-					success : function (data) {
-
-						/*
-
-							data
-								{"success":true/false}
-
-						 */
-
-						if(data.success){
-
-							//关联成功
-							//刷新关联市场活动的列表
-							showActivityList();
-
-							//清除搜索框中的信息  复选框中的√干掉 清空activitySearchBody中的内容
-
-							//关闭模态窗口
-							$("#bundModal").modal("hide");
-
-						}else{
-
-							alert("关联市场活动失败");
-
-						}
-
-					}
-
-				})
-
-			}
-
-		})
-
+		showActivityList()
 	});
 
 	function showActivityList() {
-
 		$.ajax({
-
+			type : "GET",
 			url : "workbench/clue/getActivityListByClueId.do",
+			dataType : "json",
 			data : {
-
 				"clueId" : "${c.id}"
-
 			},
-			type : "get",
-			dataType : "json",
 			success : function (data) {
+				//[{activity1},{activity2}...]
+				var html = ""
 
-				/*
-
-					data
-						[{市场活动1},{2},{3}]
-
-				 */
-
-				var html = "";
-
-				$.each(data,function (i,n) {
-
-					html += '<tr>';
-					html += '<td>'+n.name+'</td>';
-					html += '<td>'+n.startDate+'</td>';
-					html += '<td>'+n.endDate+'</td>';
-					html += '<td>'+n.owner+'</td>';
-					html += '<td><a href="javascript:void(0);" onclick="unbund(\''+n.id+'\')" style="text-decoration: none;"><span class="glyphicon glyphicon-remove"></span>解除关联</a></td>';
-					html += '</tr>';
-
+				$.each(data, function (i, n) {
+					html += '<tr>'
+					html += '<td>'+n.name+'</td>'
+					html += '<td>'+n.startDate+'</td>'
+					html += '<td>'+n.endDate+'</td>'
+					html += '<td>'+n.owner+'</td>'
+					html += '<td><a href="javascript:void(0);" onclick="unbund(\''+n.id+'\')" style="text-decoration: none;"><span class="glyphicon glyphicon-remove"></span>解除关联</a></td>'
+					html += '</tr>'
 				})
-
-				$("#activityBody").html(html);
-
+				$("#activityBody").html(html)
 			}
-
 		})
-
 	}
-
-	/*
-
-		id:我们想要一个关联关系表的id
-
-	 */
 	function unbund(id) {
-
-		$.ajax({
-
-			url : "workbench/clue/unbund.do",
-			data : {
-
-				"id" : id
-
-			},
-			type : "post",
-			dataType : "json",
-			success : function (data) {
-
-				/*
-
-					data
-						{"success":true/false}
-
-				 */
-
-				if(data.success){
-
-					//解除关联成功
-					//刷新关联的市场活动列表
-					showActivityList();
-
-				}else{
-
-					alert("解除关联失败");
-
-				}
-
-			}
-
-		})
-
+		alert(id)
 	}
 
 </script>

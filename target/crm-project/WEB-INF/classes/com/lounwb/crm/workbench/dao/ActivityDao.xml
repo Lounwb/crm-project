@@ -4,6 +4,26 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.lounwb.crm.workbench.dao.ActivityDao">
+    <select id="getActivityListByClueId" resultType="Activity">
+        select
+            car.id as id,
+            u.name as owner,
+            a.name,
+            a.startDate,
+            a.endDate
+        from
+            tbl_activity a
+        join
+            tbl_user u
+        on
+            a.owner = u.id
+        join
+            tbl_clue_activity_relation car
+        on
+            a.id = car.activityId
+        where
+            car.clueId = #{clueId}
+    </select>
     <select id="detail" resultType="Activity">
         select
             a.id,

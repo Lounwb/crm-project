@@ -28,58 +28,37 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			autoclose: true,
 			todayBtn: true,
 			pickerPosition: "top-left"
-		});
-
-		//为创建按钮绑定事件，打开添加操作的模态窗口
-		$("#addBtn").click(function () {
-
-			$.ajax({
-
-				url : "workbench/clue/getUserList.do",
-				type : "get",
-				dataType : "json",
-				success : function (data) {
-
-					/*
-
-						data
-							[{用户1},{2},{3}]
-
-					 */
-
-					var html = "<option></option>";
-
-					$.each(data,function (i,n) {
-
-						html += "<option value='"+n.id+"'>"+n.name+"</option>";
-
-					})
-
-					$("#create-owner").html(html);
-
-					var id = "${user.id}";
-
-					$("#create-owner").val(id);
-
-					//处理完所有者下拉框数据后，打开模态窗口
-					$("#createClueModal").modal("show");
-
-				}
-
-			})
-
 		})
 
-		//为保存按钮绑定事件，执行线索添加操作
-		$("#saveBtn").click(function () {
-
+		//为创建按钮绑定事件
+		$("#addBtn").click(function () {
 			$.ajax({
+				type : "GET",
+				url : "workbench/clue/getUserList.do",
+				dataType : "json",
+				success : function (data) {
+					//[{用户1},{用户2}...]
+					var html = "<option></option>"
+					$.each(data, function (i, n) {
+						html += "<option value='"+n.id+"'>"+n.name+"</option>"
+					})
+					$("#create-owner").html(html)
 
+					var id = "${user.id}"
+					$("#create-owner").val(id)
+
+					$("#createClueModal").modal("show")
+				}
+			})
+		})
+		$("#saveBtn").click(function () {
+			$.ajax({
+				type : "POST",
 				url : "workbench/clue/save.do",
+				dataType : "json",
 				data : {
-
-					"fullname" : $.trim($("#create-fullname").val()),
-					"appellation" : $.trim($("#create-appellation").val()),
+					"fullname" :  $.trim($("#create-fullname").val()),
+					"appellation" :$.trim($("#create-appellation").val()),
 					"owner" : $.trim($("#create-owner").val()),
 					"company" : $.trim($("#create-company").val()),
 					"job" : $.trim($("#create-job").val()),
@@ -93,40 +72,17 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					"contactSummary" : $.trim($("#create-contactSummary").val()),
 					"nextContactTime" : $.trim($("#create-nextContactTime").val()),
 					"address" : $.trim($("#create-address").val())
-
-
 				},
-				type : "post",
-				dataType : "json",
 				success : function (data) {
-
-					/*
-
-						data
-							{"success":true/false}
-
-					 */
-
+					//{"success":true}
 					if(data.success){
-
-						//刷新列表 略
-
-						//关闭模态窗口
-						$("#createClueModal").modal("hide");
-
-					}else{
-
-						alert("添加线索失败");
-
+						$("#createClueModal").modal("hide")
+					}else {
+						alert("线索添加失败")
 					}
-
 				}
-
 			})
-
 		})
-
-
 	});
 	
 </script>
@@ -274,7 +230,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 	</div>
 	
 	<!-- 修改线索的模态窗口 -->
-	<div class="modal fade" id="editClueModal" role="dialog">
+	<div class="modal fade" id="editModal" role="dialog">
 		<div class="modal-dialog" role="document" style="width: 90%;">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -555,7 +511,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					<tbody>
 						<tr>
 							<td><input type="checkbox" /></td>
-							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/clue/detail.do?id=464072f8e0234409981c8940c9d6a506';">马云先生</a></td>
+							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='workbench/clue/detail.do?id=24927dca2fe14cc3b5da0727827e3469';">马云先生</a></td>
 							<td>动力节点</td>
 							<td>010-84846003</td>
 							<td>12345678901</td>

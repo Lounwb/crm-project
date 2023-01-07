@@ -362,5 +362,22 @@ $("#activityBody").on("click",$("input[name=xz]"),function () {
 - 获取前面的div，然后在其后面追加html，使用append
 - 获取后面的div，然后在其前面追加html，使用before：$("#remarkDiv").before(html)
 
+9. 日期拾取器(DataTimePicker)的使用
+
+   在需要使用选择日期的input里面class 添加time
+
+   ```javascript
+   $(".time").datetimepicker({
+       minView: "month",
+       language:  'zh-CN',
+       format: 'yyyy-mm-dd',
+       autoclose: true,
+       todayBtn: true,
+       pickerPosition: "top-left"
+   })
+   ```
+
+   
+
 ### 线索（潜在客户）模块
 
