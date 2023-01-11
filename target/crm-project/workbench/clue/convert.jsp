@@ -45,119 +45,51 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			$("#searchActivityModal").modal("show");
 
 		})
-
-		//为搜索操作模态窗口的 搜索框绑定事件，执行搜索并展现市场活动列表的操作
 		$("#aname").keydown(function (event) {
-
-			if(event.keyCode==13){
-
+			if(event.keyCode == 13){
 				$.ajax({
-
+					type : "GET",
 					url : "workbench/clue/getActivityListByName.do",
-					data : {
-
-						"aname" : $.trim($("#aname").val())
-
-					},
-					type : "get",
 					dataType : "json",
+					data : {
+						"aname" : $.trim($("#aname").val())
+					},
 					success : function (data) {
-
-						/*
-
-							data
-								[{市场活动1},{2},{3}]
-
-						 */
-
-						var html = "";
-
-						$.each(data,function (i,n) {
-
-							html += '<tr>';
-							html += '<td><input type="radio" name="xz" value="'+n.id+'"/></td>';
-							html += '<td id="'+n.id+'">'+n.name+'</td>';
-							html += '<td>'+n.startDate+'</td>';
-							html += '<td>'+n.endDate+'</td>';
-							html += '<td>'+n.owner+'</td>';
-							html += '</tr>';
-
+						var html = ""
+						$.each(data, function (i, n) {
+							html += '<tr>'
+							html += '<td><input type="radio" name="xz" value="'+n.id+'"/></td>'
+							html += '<td id="'+n.id+'">'+n.name+'</td>'
+							html += '<td>'+n.startDate+'</td>'
+							html += '<td>'+n.endDate+'</td>'
+							html += '<td>'+n.owner+'</td>'
+							html += '</tr>'
 						})
-
-						$("#activitySearchBody").html(html);
-
-
+						$("#activitySearchBody").html(html)
 					}
-
 				})
-
-
-
-				return false;
-
+				return false
 			}
-
 		})
-
-
-		//为 提交（市场活动）按钮绑定事件，填充市场活动源（填写两项信息 名字+id）
 		$("#submitActivityBtn").click(function () {
+			var $xz = $("input[name=xz]:checked")
+			var id = $xz.val()
+			var name = $("#"+id).html()
 
-			//取得选中市场活动的id
-			var $xz = $("input[name=xz]:checked");
-			var id = $xz.val();
+			$("#activityId").val(id)
+			$("#activityName").val(name)
 
-			//取得选中市场活动的名字
-			var name = $("#"+id).html();
-
-			//将以上两项信息填写到 交易表单的市场活动源中
-			$("#activityId").val(id);
-			$("#activityName").val(name);
-
-			//将模态窗口关闭掉
-			$("#searchActivityModal").modal("hide");
-
+			$("#searchActivityModal").modal("hide")
 		})
-
-
-		//为转换按钮绑定事件,执行线索的转换操作
 		$("#convertBtn").click(function () {
-
-			/*
-
-				提交请求到后台，执行线索转换的操作，应该发出传统请求
-				请求结束后，最终响应回线索列表页
-
-				根据"为客户创建交易"的复选框有没有挑√，来判断是否需要创建交易
-
-
-			 */
-
 			if($("#isCreateTransaction").prop("checked")){
-
-				//alert("需要创建交易");
-				//如果需要创建交易，除了要为后台传递clueId之外，还得为后台传递交易表单中的信息，金额，预计成交日期，交易名称，阶段，市场活动源（id）
-				//window.location.href = "workbench/clue/convert.do?clueId=xxx&money=xxx&expectedDate=xxx&name=xxx&stage=xxx&activityId=xxx";
-
-				//以上传递参数的方式很麻烦，而且表单一旦扩充，挂载的参数有可能超出浏览器地址栏的上限
-				//我们想到使用提交交易表单的形式来发出本次的传统请求
-				//提交表单的参数不用我们手动去挂载（表单中写name属性），提交表单能够提交post请求
-
-				//提交表单
-				$("#tranForm").submit();
-
-			}else{
-
-				//alert("不需要创建交易");
-				//在不需要创建交易的时候，传一个clueId就可以了
-				window.location.href = "workbench/clue/convert.do?clueId=${param.id}";
-
+				//需要创建交易
+				$("#tranForm").submit()
+			}else {
+				//不需要创建交易
+				window.location.href="workbench/clue/convert.do?clueId=${param.id}"
 			}
-
-
 		})
-
-
 	});
 </script>
 
@@ -239,7 +171,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 		<h4>转换线索 <small>${param.fullname}${param.appellation}-${param.company}</small></h4>
 	</div>
 	<div id="create-customer" style="position: relative; left: 40px; height: 35px;">
-		新建客户123：${param.company}
+		新建客户：${param.company}
 	</div>
 	<div id="create-contact" style="position: relative; left: 40px; height: 35px;">
 		新建联系人：${param.fullname}${param.appellation}

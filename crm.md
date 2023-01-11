@@ -222,6 +222,22 @@ onclick='<a onclick="deleteRemark(\''+n.id+'\')"></a>'
 
 ### 线索（潜在客户）模块
 
+1. 在模态窗口中按下回车会自动刷新页面清空内容（默认行为）
+
+​	
+
+```javascript
+$("#aname").keydown(function (event) {
+	if(event.keyCode == 13){
+        alert("查询并展现市场活动类表")
+        //禁用模态窗口默认的回车行为
+        return false;
+	}
+})
+```
+
+
+
 ## 项目开发中的设计方法
 
 ### 登录验证模块
@@ -381,3 +397,6 @@ $("#activityBody").on("click",$("input[name=xz]"),function () {
 
 ### 线索（潜在客户）模块
 
+1. 在sql语句中不要在=左右加空格![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301091845295.png)
+
+​	来源于alibaba的规范

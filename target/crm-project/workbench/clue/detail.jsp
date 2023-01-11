@@ -53,6 +53,66 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 		});
 
 		showActivityList()
+
+		$("#aname").keydown(function (event) {
+			if(event.keyCode == 13){
+				$.ajax({
+					type : "GET",
+					url : "workbench/clue/getActivityListByNameAndNotByClueId.do",
+					dataType : "json",
+					data : {
+						"aname" : $.trim($("#aname").val()),
+						"ClueId" : "${c.id}"
+					},
+					success : function (data) {
+						//[{市场活动1},{市场活动2}...]
+						var html = ""
+						$.each(data, function (i, n) {
+							html += '<tr>'
+							html += '<td><input type="checkbox" name="xz" value="'+n.id+'"/></td>'
+							html += '<td>'+n.name+'</td>'
+							html += '<td>'+n.startDate+'</td>'
+							html += '<td>'+n.endDate+'</td>'
+							html += '<td>'+n.owner+'</td>'
+							html += '</tr>'
+						})
+						$("#activitySearchBody").html(html)
+					}
+				})
+				return false;
+			}
+		})
+		$("#bindBtn").click(function () {
+			var $xz = $("input[name=xz]:checked")
+
+			if($xz.length==0){
+				alert("请选择需要关联的市场活动")
+			}else {
+				//workbench/clue/bind.do?cid=xxx&aid=xxx&aid=xxx
+				var param = "cid=${c.id}&"
+				for (var i = 0; i < $xz.length; i++) {
+					param += "aid=" + $($xz[i]).val()
+					if(i < $xz.length-1){
+						param += "&"
+					}
+				}
+				$.ajax({
+					type : "POST",
+					url : "workbench/clue/bind.do",
+					dataType : "json",
+					data : param,
+					success : function (data) {
+						if(data.success){
+							showActivityList()
+
+							$("#bindModal").modal("hide")
+						}else {
+							alert("关联市场活动失败")
+						}
+					}
+				})
+			}
+		})
 	});
 
 	function showActivityList() {
@@ -73,15 +133,32 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					html += '<td>'+n.startDate+'</td>'
 					html += '<td>'+n.endDate+'</td>'
 					html += '<td>'+n.owner+'</td>'
-					html += '<td><a href="javascript:void(0);" onclick="unbund(\''+n.id+'\')" style="text-decoration: none;"><span class="glyphicon glyphicon-remove"></span>解除关联</a></td>'
+					html += '<td><a href="javascript:void(0);" onclick="unbind(\''+n.id+'\')" style="text-decoration: none;"><span class="glyphicon glyphicon-remove"></span>解除关联</a></td>'
 					html += '</tr>'
 				})
 				$("#activityBody").html(html)
 			}
 		})
 	}
-	function unbund(id) {
-		alert(id)
+	function unbind(id) {
+		if (window.confirm("是否要删除?")) {
+			$.ajax({
+				type : "POST",
+				url : "workbench/clue/unbind.do",
+				dataType : "json",
+				data : {
+					"id" : id
+				},
+				success : function (data) {
+					//{"success":true}
+					if(data.success){
+						showActivityList()
+					}else {
+						alert("解除关联失败")
+					}
+				}
+			})
+		}
 	}
 
 </script>
@@ -90,7 +167,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 <body>
 
 	<!-- 关联市场活动的模态窗口 -->
-	<div class="modal fade" id="bundModal" role="dialog">
+	<div class="modal fade" id="bindModal" role="dialog">
 		<div class="modal-dialog" role="document" style="width: 80%;">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -103,7 +180,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					<div class="btn-group" style="position: relative; top: 18%; left: 8px;">
 						<form class="form-inline" role="form">
 						  <div class="form-group has-feedback">
-						    <input type="text" class="form-control" id="aname" style="width: 300px;" placeholder="请输入市场活动名称，支持模糊查询123">
+						    <input type="text" class="form-control" id="aname" style="width: 300px;" placeholder="请输入市场活动名称，支持模糊查询">
 						    <span class="glyphicon glyphicon-search form-control-feedback"></span>
 						  </div>
 						</form>
@@ -139,7 +216,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					<button type="button" class="btn btn-primary" id="bundBtn">关联</button>
+					<button type="button" class="btn btn-primary" id="bindBtn">关联</button>
 				</div>
 			</div>
 		</div>
@@ -486,7 +563,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			</div>
 			
 			<div>
-				<a href="javascript:void(0);" data-toggle="modal" data-target="#bundModal" style="text-decoration: none;"><span class="glyphicon glyphicon-plus"></span>关联市场活动</a>
+				<a href="javascript:void(0);" data-toggle="modal" data-target="#bindModal" style="text-decoration: none;"><span class="glyphicon glyphicon-plus"></span>关联市场活动</a>
 			</div>
 		</div>
 	</div>
