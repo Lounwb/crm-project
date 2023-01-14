@@ -23,7 +23,9 @@
 
    在实际项目开发中，一定是按照先做添加，再做修改的这种顺序所以，为了节省开发时间，修改操作一般都是copy添加操作
 
-   
+4. 后端为前端提供数据的两种方式
+
+   ![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301131810574.png)
 
 ## 项目中出现的问题
 
@@ -236,7 +238,46 @@ $("#aname").keydown(function (event) {
 })
 ```
 
+### 交易模块
 
+1. [解决]Tomcat 9.0.70版本在监听器上使用ResourceBundle出现异常，导致无法正常启动服务器
+
+   ```java
+   //处理Stage2Possibility.properties文件
+           //解析文件
+   ResourceBundle bundle = ResourceBundle.getBundle("Stage2Possibility");
+   Enumeration<String> keys = bundle.getKeys();
+   //将文件中键值对关系处理成java中的键值对关系 Map<stage:String, possibility:String> pMap
+   Map<String, String> pMap = new HashMap<>();
+   while (keys.hasMoreElements()) {
+      tring key = keys.nextElement();
+      String value = bundle.getString(key);
+      pMap.put(key, value);
+   }
+   application.setAttribute("pMap", pMap);
+   ```
+
+   使用Tomcat 10.0.x版本可以正常启动服务器，但是需要重构项目，所以没写。
+
+   原因：idea资源文件不自动生成到classes里面
+
+   过程：
+
+   ​	早上启动服务器发现不能正常启动，因为昨天晚上写的内容没测试，所以考虑写的内容有Bug.(下图是报错信息)
+
+   ​	![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301131325443.png)
+
+   ​	百度后，csdn说我昨天没关服务器，今天打开服务器tomcat检测到两个线程冲突，所以需要关闭。关闭后仍然不能解决问题.
+
+   ​	![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301131327615.png)
+
+   查看Tomcat Localhost Log以后发现找不到我的properties，一开始还以为是tomcat9不支持，使用tomcat10以后能后正常使用，还以为是版本问题。结果百度了一下说classes里面没有resources文件，所以找不到。
+
+   ![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301131330374.png)
+
+   复制过来以后完美解决问题。
+
+2. 
 
 ## 项目开发中的设计方法
 
@@ -400,3 +441,93 @@ $("#activityBody").on("click",$("input[name=xz]"),function () {
 1. 在sql语句中不要在=左右加空格![](https://raw.githubusercontent.com/Lounwb/imgbed-picgo-repo/master/blogimg/202301091845295.png)
 
 ​	来源于alibaba的规范
+
+### 交易模块
+
+1. 自动联想和自动补全功能组件
+
+   ```javascript
+   $("#create-customerName").typeahead({
+       source: function (query, process) {
+           $.get(
+               "workbench/transaction/getCustomerName.do",
+               {"name": query},
+               function (data) {
+                   //alert(data);
+                   /*
+   						String..
+   							data
+   								[{客户名称1},{2},{3}]
+   
+   						 */
+   
+                   process(data);
+               },
+               "json"
+           );
+       },
+       delay: 500
+   });
+   ```
+
+2. 键值对的数据的使用
+
+   ```javascript
+   /*
+   
+   			关于阶段和可能性
+   				是一种一一对应的关系
+   				一个阶段对应一个可能性
+   				我们现在可以将阶段和可能性想象成是一种键值对之间的对应关系
+   				以阶段为key，通过选中的阶段，触发可能性value
+   
+   				stage               possibility
+   				key					value
+   				01资质审查			10
+   				02需求分析			25
+   				03价值建议			40
+   				...
+   				...
+   				07成交				100
+   				08..				0
+   				09..				0
+   
+   				对于以上的数据，通过观察得到结论
+   				（1）数据量不是很大
+   				（2）这是一种键值对的对应关系
+   
+   				如果同时满足以上两种结论，那么我们将这样的数据保存到数据库表中就没有什么意义了
+   				如果遇到这种情况，我们需要用到properties属性文件来进行保存
+   				stage2Possibility.properties
+   				01资质审查=10
+   				02需求分析=20
+   				....
+   				
+   				但是properties文件对中文支持很差，不能直接使用01资质审查=10，而是采用汉字转换成unicode码的方式来存储，也就是01\u8D44\u8D28\u5BA1\u67E5=10
+   
+   				stage2Possibility.properties这个文件表示的是阶段和键值对之间的对应关系
+   				将来，我们通过stage，以及对应关系，来取得可能性这个值
+   				这种需求在交易模块中需要大量的使用到
+   
+   				所以我们就需要将该文件解析在服务器缓存中
+   				application.setAttribute(stage2Possibility.properties文件内容)
+   
+   
+   		 */
+   ```
+
+   
+
+   ```properties
+   01\u8D44\u8D28\u5BA1\u67E5=10
+   02\u9700\u6C42\u5206\u6790=25
+   03\u4EF7\u503C\u5EFA\u8BAE=40
+   04\u786E\u5B9A\u51B3\u7B56\u8005=60
+   05\u63D0\u6848/\u62A5\u4EF7=80
+   06\u8C08\u5224/\u590D\u5BA1=90
+   07\u6210\u4EA4=100
+   08\u4E22\u5931\u7684\u7EBF\u7D22=0
+   09\u56E0\u7ADE\u4E89\u4E22\u5931\u5173\u95ED=0
+   ```
+
+   

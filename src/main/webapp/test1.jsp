@@ -21,8 +21,8 @@
             }
         })
 
-        String createTime = DateTimeUtil.getSysTime();
         String createBy = ((User)request.getSession().getAttribute("user")).getName();
+        String createTime = DateTimeUtil.getSysTime();
 
         $(".time").datetimepicker({
             minView: "month",

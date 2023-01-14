@@ -1,45 +1,33 @@
 <%@ page import="java.util.List" %>
-<%@ page import="com.bjpowernode.crm.settings.domain.DicValue" %>
+<%@ page import="com.lounwb.crm.settings.domain.DicValue" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
-<%@ page import="com.bjpowernode.crm.workbench.domain.Tran" %>
+<%@ page import="com.lounwb.crm.workbench.domain.Tran" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
 
 	//准备字典类型为stage的字典值列表
 	List<DicValue> dvList = (List<DicValue>)application.getAttribute("stageList");
-
 	//准备阶段和可能性之间的对应关系
 	Map<String,String> pMap = (Map<String,String>)application.getAttribute("pMap");
-
 	//根据pMap准备pMap中的key集合
 	Set<String> set = pMap.keySet();
-
 	//准备：前面正常阶段和后面丢失阶段的分界点下标
 	int point = 0;
 	for(int i=0;i<dvList.size();i++){
-
 		//取得每一个字典值
 		DicValue dv = dvList.get(i);
-
 		//从dv中取得value
 		String stage = dv.getValue();
 		//根据stage取得possibility
 		String possibility = pMap.get(stage);
-
 		//如果可能性为0，说明找到了前面正常阶段和后面丢失阶段的分界点
 		if("0".equals(possibility)){
-
 			point = i;
-
 			break;
-
 		}
-
-
 	}
-
 %>
 <!DOCTYPE html>
 <html>
@@ -88,24 +76,20 @@
 			$("#remarkDiv").css("height","90px");
 			cancelAndSaveBtnDefault = true;
 		});
-		
 		$(".remarkDiv").mouseover(function(){
 			$(this).children("div").children("div").show();
-		});
+		})
 		
 		$(".remarkDiv").mouseout(function(){
 			$(this).children("div").children("div").hide();
 		});
-		
 		$(".myHref").mouseover(function(){
 			$(this).children("span").css("color","red");
 		});
-		
 		$(".myHref").mouseout(function(){
 			$(this).children("span").css("color","#E6E6E6");
 		});
-		
-		
+
 		//阶段提示框
 		$(".mystage").popover({
             trigger:'manual',
@@ -126,8 +110,6 @@
                         }
                     }, 100);
                 });
-
-
 		//在页面加载完毕后，展现交易历史列表
 		showHistoryList();
 
@@ -136,27 +118,16 @@
 	function showHistoryList() {
 
 		$.ajax({
-
 			url : "workbench/transaction/getHistoryListByTranId.do",
 			data : {
-
 				"tranId" : "${t.id}"
-
 			},
 			type : "get",
 			dataType : "json",
 			success : function (data) {
-
-				/*
-
-					data
-						[{交易历史1},{2},{3}]
-
-				 */
+				//[{交易历史1},{2},{3}]
 				var html = "";
-
 				$.each(data,function (i,n) {
-
 					html += '<tr>';
 					html += '<td>'+n.stage+'</td>';
 					html += '<td>'+n.money+'</td>';
@@ -165,18 +136,11 @@
 					html += '<td>'+n.createTime+'</td>';
 					html += '<td>'+n.createBy+'</td>';
 					html += '</tr>';
-
 				})
-
 				$("#tranHistoryBody").html(html);
-
-
 			}
-
 		})
-
 	}
-
 	/*
 
 		方法：改变交易阶段
